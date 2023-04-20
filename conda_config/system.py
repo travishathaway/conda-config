@@ -138,6 +138,8 @@ def get_search_path_from_config(config: SystemConfiguration) -> tuple[str, ...]:
     """
     Uses config parameters to determine the search path.
     """
+    search_path: tuple[str, ...]
+
     if config.is_windows:
         search_path = (
             "C:/ProgramData/conda/.condarc",

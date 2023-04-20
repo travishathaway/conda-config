@@ -23,6 +23,8 @@ MACHINE_BITS = 8 * struct.calcsize("P")
 
 APP_NAME = "conda"
 
+SEARCH_PATH: tuple[str, ...]
+
 if ON_WIN:
     SEARCH_PATH = (
         "C:/ProgramData/conda/.condarc",
@@ -118,6 +120,8 @@ DEFAULT_AGGRESSIVE_UPDATE_PACKAGES = (
     "certifi",
     "openssl",
 )
+
+COMPATIBLE_SHELLS: tuple[str, ...]
 
 if ON_WIN:
     COMPATIBLE_SHELLS = (

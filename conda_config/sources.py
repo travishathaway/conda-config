@@ -73,7 +73,7 @@ def get_config_file_parser(file_type: ConfigFileTypes) -> ConfigFileParserFunc:
     elif file_type == "json":
         return read_json_file
     else:
-        raise NotImplemented(f"File type '{file_type}' is not currently supported")
+        raise NotImplementedError(f"File type '{file_type}' is not currently supported")
 
 
 class ConfigSource(abc.ABC):
@@ -113,7 +113,7 @@ class FileConfigSource(ConfigSource):
         self.config_files = config_files
 
         # Expensive operation that loads all the different configuration files using
-        # ``self.file_parser`` function that was deduced from the ``file_type``
+        # `self.file_parser` function that was provided via the `file_type` argument.
         self.raw_data = tuple((path, self.file_parser(path)) for path in self.config_files)
 
         self.parsed_data = self._merge(self.config_files)

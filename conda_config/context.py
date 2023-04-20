@@ -12,7 +12,7 @@ from typing import Sequence, Any
 from .condarc import CONDARC_ENV_VAR_NAME
 from .constants import DEFAULTS_CHANNEL_NAME, LOCAL_CHANNEL_NAME
 from .exceptions import ArgumentError, OperationNotAllowed
-from .sources import ConfigSource, CLIConfigSource, FileConfigSource, ConfigFileTypes, EnvConfigSource
+from .sources import ConfigSource, CLIConfigSource, FileConfigSource, EnvConfigSource
 from .system import SystemConfiguration
 
 #: Logger used to give warnings and errors
@@ -54,9 +54,9 @@ class Context:
     def __init__(
         self,
         system_config: SystemConfiguration,
-        file_config_source: FileConfigSource = None,
-        env_config_source: EnvConfigSource = None,
-        cli_config_source: CLIConfigSource = None,
+        file_config_source: FileConfigSource | None = None,
+        env_config_source: EnvConfigSource | None = None,
+        cli_config_source: CLIConfigSource | None = None,
     ):
         """
         Creates the object responsible for gathering all application configuration.
@@ -85,7 +85,7 @@ class Context:
         methods.
         """
         # Used for collecting values which merge sequence and mapping types
-        config_value_seq = ()
+        config_value_seq: tuple[str, ...] = tuple()
         config_value_map = {}
 
         for source in self.CONFIG_PARSE_ORDER:
@@ -213,7 +213,7 @@ def get_condarc_env_file(conda_env_var_name: str = CONDARC_ENV_VAR_NAME) -> Path
 
 
 def get_file_config_source(
-    system_config: SystemConfiguration, extra_config_files: tuple[Path, ...] = None
+    system_config: SystemConfiguration, extra_config_files: tuple[Path, ...] | None = None
 ) -> FileConfigSource:
     """
     Using a variety of sources, retrieves all locations where configuration files are stored
@@ -229,11 +229,13 @@ def get_file_config_source(
     if condarc_env_file:
         config_files += (condarc_env_file,)
 
-    return FileConfigSource(ConfigFileTypes.yaml, config_files)
+    return FileConfigSource("yaml", config_files)
 
 
 def create_context(
-    args_obj: Namespace | None = None, extra_config_files: tuple[Path, ...] = None
+    args_obj: Namespace | None = None,
+    system_config: SystemConfiguration | None = None,
+    extra_config_files: tuple[Path, ...] | None = None,
 ) -> Context:
     """
     This function is responsible for constructing our Context object. It first collects
@@ -241,10 +243,11 @@ def create_context(
     them all.
 
     :param args_obj: Namespace object that is created after parsing CLI arguments
+    :param system_config: SystemConfiguration object that holds various system information
     :param extra_config_files: Extra files, other than standard system locations, we want
                                to include; these override values from previous files.
     """
-    system_config = SystemConfiguration()
+    system_config = system_config or SystemConfiguration()
     file_config_source = get_file_config_source(system_config, extra_config_files)
 
     args_obj = args_obj or Namespace()

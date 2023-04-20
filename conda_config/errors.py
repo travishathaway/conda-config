@@ -22,8 +22,9 @@ def format_validation_error(exc: ValidationError, path: Path) -> str:
     Formats a ``pydantic.Validation`` error as a ``str``
     """
     error_str = []
+
     for err in exc.errors():
-        loc = ",".join(err.get("loc", tuple()))
+        loc = ",".join(str(value) for value in err.get("loc", tuple()))
         ctx = err.get("ctx", {})
         given = ctx.get("given")
         permitted = ctx.get("permitted")

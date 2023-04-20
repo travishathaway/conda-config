@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Sequence
 from functools import reduce
 from pathlib import Path
 from typing import Literal, Any, Union, Tuple, Dict
@@ -46,20 +47,20 @@ def merge_condarc(obj_one: CondarcConfig, obj_two: CondarcConfig) -> CondarcConf
 
     Depending on the type of object we receive, we use a different merging mechanism:
 
-    - tuple: concatenate and ensure the values are unique; this needs to be updated as
-      as it currently destroys order in which these settings are defined, which is important.
-    - dict: TBD!
+    - tuple: concatenate and ensure the values are unique
+    - dict: merged together
+    - str, int, bool: obj_two overrides obj_one
     """
-    merged_values = {}
+    merged_values: dict[str, Any] = {}
 
-    for fld, value in obj_one.dict().items():
+    for fld, value in obj_two.dict().items():
         if isinstance(value, tuple):
-            merged_values[fld] = tuple(set(value + getattr(obj_two, fld, tuple())))
+            merged_values[fld] = tuple(dict.fromkeys(value + getattr(obj_one, fld, tuple())))
         elif isinstance(value, dict):
-            value.update(getattr(obj_two, fld))
+            value.update(getattr(obj_one, fld))
             merged_values[fld] = value
         else:
-            merged_values[fld] = value if value is not None else getattr(obj_two, fld)
+            merged_values[fld] = value if value is not None else getattr(obj_one, fld)
 
     return CondarcConfig(**merged_values)
 
@@ -78,11 +79,7 @@ def remap_aliases(config: dict[str, Any]) -> None:
             config[field_name] = config.pop(alias)
 
 
-def parse_single_config(path: Path, config: Any):
-    ...
-
-
-def get_condarc_obj(config_data: tuple[tuple[Path, dict], ...]) -> CondarcConfig:
+def get_condarc_obj(config_data: Sequence[tuple[Path, dict]]) -> CondarcConfig:
     """
     From a tuple of (Path, dict) objects where dict is the parsed data, perform the
     desired merge operation and return a single CondaRC object.
@@ -159,6 +156,13 @@ class CondarcConfig(BaseSettings):
         default=True,
         description="""
         Permit use of the --overide-channels command-line flag.
+        """,
+    )
+
+    use_local: bool = Field(
+        default=False,
+        description="""
+        Only use local channels for all commands.
         """,
     )
 
