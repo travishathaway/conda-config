@@ -8,7 +8,7 @@ readme = "README.md"
 packages = [{include = "conda_config"}]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.8.1"
 pydantic = "^1.10.7"
 ruamel-yaml = "^0.17.21"
 
@@ -18,6 +18,9 @@ pytest-cov = "^4.0.0"
 mypy = "^1.2.0"
 ipython = "^8.12.0"
 pytest-mock = "^3.10.0"
+flake8 = "^6.0.0"
+black = "^23.3.0"
+pre-commit = "^3.2.2"
 
 [build-system]
 requires = ["poetry-core"]

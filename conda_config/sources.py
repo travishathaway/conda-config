@@ -114,7 +114,9 @@ class FileConfigSource(ConfigSource):
 
         # Expensive operation that loads all the different configuration files using
         # `self.file_parser` function that was provided via the `file_type` argument.
-        self.raw_data = tuple((path, self.file_parser(path)) for path in self.config_files)
+        self.raw_data = tuple(
+            (path, self.file_parser(path)) for path in self.config_files
+        )
 
         self.parsed_data = self._merge(self.config_files)
 

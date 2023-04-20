@@ -6,12 +6,16 @@ import logging
 from collections.abc import Sequence
 from functools import reduce
 from pathlib import Path
-from typing import Literal, Any, Union, Tuple, Dict
+from typing import Literal, Any
 
 from pydantic import BaseSettings, Field, ValidationError
 
 from .exceptions import CondaConfigError
-from .errors import format_validation_error, format_all_validation_errors, CONFIG_ERROR_PREFIX
+from .errors import (
+    format_validation_error,
+    format_all_validation_errors,
+    CONFIG_ERROR_PREFIX,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +36,7 @@ FIELD_ALIASES = {
     "yes": "always_yes",
     "json": "json__",
     "verbose": "verbosity",
-    "solver": "experimental_solver"
+    "solver": "experimental_solver",
 }
 
 #: Name of the environment variable which stores path to config file
@@ -55,7 +59,9 @@ def merge_condarc(obj_one: CondarcConfig, obj_two: CondarcConfig) -> CondarcConf
 
     for fld, value in obj_two.dict().items():
         if isinstance(value, tuple):
-            merged_values[fld] = tuple(dict.fromkeys(value + getattr(obj_one, fld, tuple())))
+            merged_values[fld] = tuple(
+                dict.fromkeys(value + getattr(obj_one, fld, tuple()))
+            )
         elif isinstance(value, dict):
             value.update(getattr(obj_one, fld))
             merged_values[fld] = value
@@ -121,7 +127,7 @@ class CondarcConfig(BaseSettings):
     #              Channel Configuration               #
     ####################################################
 
-    channels: Tuple[Union[str, Dict[str, Dict[str, str]]], ...] = Field(
+    channels: tuple[str | dict[str, dict[str, str]], ...] = Field(
         default=("defaults",),
         description="""
         **aliases** -> channel
@@ -139,7 +145,7 @@ class CondarcConfig(BaseSettings):
         """,
     )
 
-    default_channels: Tuple[str, ...] = Field(
+    default_channels: tuple[str, ...] = Field(
         default=(
             "https://repo.anaconda.com/pkgs/main",
             "https://repo.anaconda.com/pkgs/r",
@@ -166,7 +172,7 @@ class CondarcConfig(BaseSettings):
         """,
     )
 
-    allowlist_channels: Tuple[str, ...] = Field(
+    allowlist_channels: tuple[str, ...] = Field(
         default_factory=tuple,
         description="""
     **env_var_string_delimiter** ->  ','
@@ -179,7 +185,7 @@ class CondarcConfig(BaseSettings):
     """,
     )
 
-    custom_channels: Dict[str, str] = Field(
+    custom_channels: dict[str, str] = Field(
         default={"pkgs/pro": "https://repo.anaconda.com"},
         description="""
         A map of key-value pairs where the key is a channel name and the value
@@ -192,7 +198,7 @@ class CondarcConfig(BaseSettings):
         """,
     )
 
-    custom_multichannels: Dict[str, Tuple[str, ...]] = Field(
+    custom_multichannels: dict[str, tuple[str, ...]] = Field(
         default_factory=dict,
         description="""
         A multichannel is a metachannel composed of multiple channels. The two
@@ -206,7 +212,7 @@ class CondarcConfig(BaseSettings):
         """,
     )
 
-    migrated_channel_aliases: Tuple[str, ...] = Field(
+    migrated_channel_aliases: tuple[str, ...] = Field(
         default_factory=tuple,
         description="""
         **env_var_string_delimiter** ->  ','
@@ -216,7 +222,7 @@ class CondarcConfig(BaseSettings):
         """,
     )
 
-    migrated_custom_channels: Dict[str, str] = Field(
+    migrated_custom_channels: dict[str, str] = Field(
         default_factory=dict,
         description="""
         A map of key-value pairs where the key is a channel name and the value
@@ -254,7 +260,7 @@ class CondarcConfig(BaseSettings):
         """,
     )
 
-    repodata_fns: Tuple[str, ...] = Field(
+    repodata_fns: tuple[str, ...] = Field(
         default=("current_repodata.json", "repodata.json"),
         description="""
         **env_var_string_delimiter** ->  ','
@@ -267,7 +273,7 @@ class CondarcConfig(BaseSettings):
         """,
     )
 
-    use_only_tar_bz2: Union[bool, None] = Field(
+    use_only_tar_bz2: bool | None = Field(
         default=None,
         description="""
         A boolean indicating that only .tar.bz2 conda packages should be
@@ -289,7 +295,7 @@ class CondarcConfig(BaseSettings):
     #            Basic Conda Configuration             #
     ####################################################
 
-    envs_dirs: Tuple[str, ...] = Field(
+    envs_dirs: tuple[str, ...] = Field(
         default_factory=tuple,
         description="""
         **aliases** -> envs_path
@@ -302,7 +308,7 @@ class CondarcConfig(BaseSettings):
         """,
     )
 
-    pkgs_dirs: Tuple[str, ...] = Field(
+    pkgs_dirs: tuple[str, ...] = Field(
         default_factory=tuple,
         description="""
         **env_var_string_delimiter** ->  ','
@@ -349,7 +355,7 @@ class CondarcConfig(BaseSettings):
         """,
     )
 
-    local_repodata_ttl: Union[int, bool] = Field(
+    local_repodata_ttl: int | bool = Field(
         default=1,
         description="""
         For a value of False or 0, always fetch remote repodata (HTTP 304
@@ -367,7 +373,7 @@ class CondarcConfig(BaseSettings):
         """,
     )
 
-    proxy_servers: Dict[str, str] = Field(
+    proxy_servers: dict[str, str] = Field(
         default_factory=dict,
         description="""
         A mapping to enable proxy settings. Keys can be either (1) a
@@ -429,7 +435,7 @@ class CondarcConfig(BaseSettings):
     #               Solver Configuration               #
     ####################################################
 
-    aggressive_update_packages: Tuple[str, ...] = Field(
+    aggressive_update_packages: tuple[str, ...] = Field(
         default=("ca-certificates", "certifi", "openssl"),
         description="""
         **env_var_string_delimiter** ->  ','
@@ -465,7 +471,7 @@ class CondarcConfig(BaseSettings):
         """,
     )
 
-    create_default_packages: Tuple[str, ...] = Field(
+    create_default_packages: tuple[str, ...] = Field(
         default_factory=tuple,
         description="""
         **env_var_string_delimiter** ->  ','
@@ -474,7 +480,7 @@ class CondarcConfig(BaseSettings):
         """,
     )
 
-    disallowed_packages: Tuple[str, ...] = Field(
+    disallowed_packages: tuple[str, ...] = Field(
         default_factory=tuple,
         description="""
         **aliases** -> disallow
@@ -495,7 +501,7 @@ class CondarcConfig(BaseSettings):
         """,
     )
 
-    pinned_packages: Tuple[str, ...] = Field(
+    pinned_packages: tuple[str, ...] = Field(
         default_factory=tuple,
         description="""
         **env_var_string_delimiter** ->  '&'
@@ -513,7 +519,7 @@ class CondarcConfig(BaseSettings):
         """,
     )
 
-    track_features: Tuple[str, ...] = Field(
+    track_features: tuple[str, ...] = Field(
         default_factory=tuple,
         description="""
         **env_var_string_delimiter** -> ','

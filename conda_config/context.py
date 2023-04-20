@@ -7,7 +7,8 @@ from argparse import Namespace
 from logging import getLogger
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Sequence, Any
+from typing import Any
+from collections.abc import Sequence
 
 from .condarc import CONDARC_ENV_VAR_NAME
 from .constants import DEFAULTS_CHANNEL_NAME, LOCAL_CHANNEL_NAME
@@ -21,7 +22,7 @@ logger = getLogger(__name__)
 
 class Context:
     """
-    This object is meant to be defined as a singleton within this application
+    This object is meant to be defined as a singleton within conda compatible applications
     and contains all configuration parameters for the application. These configuration
     parameters come from the following sources:
 
@@ -30,14 +31,12 @@ class Context:
     - Configuration files (i.e. ``condarc`` files)
     - System level configuration provided by the SystemConfiguration object
 
-    Basically, it's your one-stop-shop for all things configurable! I'm still not
-    sure that this is a good pattern to use. Here are some outstanding questions:
+    In conda applications, the above sources have an order precedence, meaning
+    sources will override each other's value if both defined. Furthermore, if these
+    values are sequences (e.g. lists) their values will be merged together but
+    the order will indicate which source carries a higher precedence (e.g. "channels").
 
-    - Will smashing all of these different sources together be confusing to future
-      maintainers?
-    - Is easy enough to understand the resolution order of configuration variables?
-    - What if I just want direct access to the arguments object? How does that work?
-
+    This order of precedence is defined on the `CONFIG_PARSE_ORDER` property.
     """
 
     #: Sequence holding all the different "ConfigSource" objects (i.e. classes that implement this
@@ -48,7 +47,7 @@ class Context:
     #: and other environment specific things (e.g. prefix, conda environment name)
     _system_config: SystemConfiguration
 
-    #: Determines the order of importance for our configuration sources
+    #: Determines the order of precedence for our configuration sources
     CONFIG_PARSE_ORDER = ("cli", "env", "file")
 
     def __init__(
@@ -175,9 +174,13 @@ class Context:
                 "channels" in data for _, data in self._file_config_source.raw_data
             )
             if not channel_in_config_files:
-                return tuple(dict.fromkeys((*local_add, *channel, DEFAULTS_CHANNEL_NAME)))
+                return tuple(
+                    dict.fromkeys((*local_add, *channel, DEFAULTS_CHANNEL_NAME))
+                )
 
-            return tuple(dict.fromkeys(tuple(channel) + self._get_channel_names() + local_add))
+            return tuple(
+                dict.fromkeys(tuple(channel) + self._get_channel_names() + local_add)
+            )
 
         return tuple(dict.fromkeys(self._get_channel_names() + local_add))
 
@@ -209,11 +212,14 @@ def get_condarc_env_file(conda_env_var_name: str = CONDARC_ENV_VAR_NAME) -> Path
         if condarc_file.is_file():
             return condarc_file
         else:
-            logger.warning(f'Unable to open "{CONDARC_ENV_VAR_NAME}" file: {condarc_file}')
+            logger.warning(
+                f'Unable to open "{CONDARC_ENV_VAR_NAME}" file: {condarc_file}'
+            )
 
 
 def get_file_config_source(
-    system_config: SystemConfiguration, extra_config_files: tuple[Path, ...] | None = None
+    system_config: SystemConfiguration,
+    extra_config_files: tuple[Path, ...] | None = None,
 ) -> FileConfigSource:
     """
     Using a variety of sources, retrieves all locations where configuration files are stored

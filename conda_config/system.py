@@ -6,7 +6,7 @@ import os
 import sys
 from pathlib import Path
 import platform
-from typing import Sequence
+from collections.abc import Sequence
 
 from . import constants as const
 
@@ -75,13 +75,17 @@ class SystemConfiguration:
         self.conda_root = kwargs.get("conda_root") or os.getenv("CONDA_ROOT", "")
         self.conda_prefix = kwargs.get("conda_prefix") or os.getenv("CONDA_PREFIX", "")
         self.conda_exe = kwargs.get("conda_exe") or os.getenv("CONDA_EXE", "")
-        self.conda_python_exe = kwargs.get("conda_python_exe") or os.getenv("CONDA_PYTHON_EXE", "")
+        self.conda_python_exe = kwargs.get("conda_python_exe") or os.getenv(
+            "CONDA_PYTHON_EXE", ""
+        )
         self.conda_shlvl = kwargs.get("conda_shlvl") or os.getenv("CONDA_SHLVL", 1)
         self.conda_default_env = kwargs.get("conda_default_env") or os.getenv(
             "CONDA_DEFAULT_ENV", ""
         )
         self.condarc = kwargs.get("condarc") or os.getenv("CONDARC", "")
-        self.xdg_config_home = kwargs.get("xdg_config_home") or os.getenv("XDG_CONFIG_HOME", "")
+        self.xdg_config_home = kwargs.get("xdg_config_home") or os.getenv(
+            "XDG_CONFIG_HOME", ""
+        )
         self.user_rc_path = kwargs.get("user_rc_path") or (
             Path(os.path.abspath(os.path.expanduser("~/.condarc")))
         )
@@ -91,11 +95,14 @@ class SystemConfiguration:
 
         # Determine OS type
         self.is_windows = kwargs.get("is_windows") or (
-            sys.platform.startswith("win") or (sys.platform == "cli" and os.name == "nt")
+            sys.platform.startswith("win")
+            or (sys.platform == "cli" and os.name == "nt")
         )
 
         # Setup search path for parsing condarc config files
-        self.search_path = kwargs.get("search_path") or get_search_path_from_config(self)
+        self.search_path = kwargs.get("search_path") or get_search_path_from_config(
+            self
+        )
 
     @property
     def valid_condarc_files(self) -> tuple[Path, ...]:
@@ -115,7 +122,9 @@ class SystemConfiguration:
     def default_channels(self) -> tuple[str, ...]:
         """We differ the default channels that configured depending on OS type"""
         return tuple(
-            const.DEFAULT_CHANNELS_WIN if self.is_windows else const.DEFAULT_CHANNELS_UNIX
+            const.DEFAULT_CHANNELS_WIN
+            if self.is_windows
+            else const.DEFAULT_CHANNELS_UNIX
         )
 
     @property

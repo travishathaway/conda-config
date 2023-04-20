@@ -10,7 +10,9 @@ def test_happy_path(tmp_path, base_condarc):
     condarc_file = tmp_path / ".condarc"
     condarc_file.write_text(base_condarc)
     system_config = MagicMock(valid_condarc_files=[])
-    context = create_context(system_config=system_config, extra_config_files=(condarc_file,))
+    context = create_context(
+        system_config=system_config, extra_config_files=(condarc_file,)
+    )
 
     assert context.channels == ("conda-forge",)
     assert context.always_yes is True
@@ -25,7 +27,9 @@ def test_happy_path_with_aliases(tmp_path, base_condarc_using_alias):
     condarc_file = tmp_path / ".condarc"
     condarc_file.write_text(base_condarc_using_alias)
     system_config = MagicMock(valid_condarc_files=[])
-    context = create_context(system_config=system_config, extra_config_files=(condarc_file,))
+    context = create_context(
+        system_config=system_config, extra_config_files=(condarc_file,)
+    )
 
     assert context.channels == ("conda-forge",)
 

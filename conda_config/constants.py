@@ -14,10 +14,12 @@ LOCAL_CHANNEL_NAME = "local"
 
 ON_WIN = bool(sys.platform == "win32")
 
-PREFIX_PLACEHOLDER = ("/opt/anaconda1anaconda2"
-                      # this is intentionally split into parts, such that running
-                      # this program on itself will leave it unchanged
-                      "anaconda3")
+PREFIX_PLACEHOLDER = (
+    "/opt/anaconda1anaconda2"
+    # this is intentionally split into parts, such that running
+    # this program on itself will leave it unchanged
+    "anaconda3"
+)
 
 MACHINE_BITS = 8 * struct.calcsize("P")
 
@@ -197,6 +199,7 @@ class PathConflict(Enum):
 
 class DepsModifier(Enum):
     """Flags to enable alternate handling of dependencies."""
+
     NOT_SET = "not_set"  # default
     NO_DEPS = "no_deps"
     ONLY_DEPS = "only_deps"
@@ -207,7 +210,9 @@ class DepsModifier(Enum):
 
 class UpdateModifier(Enum):
     SPECS_SATISFIED_SKIP_SOLVE = "specs_satisfied_skip_solve"
-    FREEZE_INSTALLED = "freeze_installed"  # freeze is a better name for --no-update-deps
+    FREEZE_INSTALLED = (
+        "freeze_installed"  # freeze is a better name for --no-update-deps
+    )
     UPDATE_DEPS = "update_deps"
     UPDATE_SPECS = "update_specs"  # default
     UPDATE_ALL = "update_all"

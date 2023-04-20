@@ -39,10 +39,13 @@ TEST_JSON_FILE_VALID_TWO = """{
 """
 
 
-@pytest.mark.parametrize("contents,name, function", (
+@pytest.mark.parametrize(
+    "contents,name, function",
+    (
         (TEST_YAML_FILE_VALID_ONE, "test.yaml", sources.read_yaml_file),
-        (TEST_JSON_FILE_VALID_ONE, "test.json", sources.read_json_file)
-))
+        (TEST_JSON_FILE_VALID_ONE, "test.json", sources.read_json_file),
+    ),
+)
 def test_read_file_success(tmpdir, contents, name, function):
     """
     Tests a successful opening with various file type parsing functions.
@@ -56,9 +59,13 @@ def test_read_file_success(tmpdir, contents, name, function):
     assert content["always_yes"] is False
 
 
-@pytest.mark.parametrize("function", (
-        sources.read_json_file, sources.read_yaml_file,
-))
+@pytest.mark.parametrize(
+    "function",
+    (
+        sources.read_json_file,
+        sources.read_yaml_file,
+    ),
+)
 def test_file_read_error(function):
     """
     Tests a failed opening of file with various file parsers.
@@ -94,7 +101,9 @@ def test_read_json_file_json_error(tmpdir, mocker):
     json_file.write(TEST_JSON_FILE_VALID_ONE)
 
     parser = mocker.patch("conda_config.sources.json")
-    parser.load = MagicMock(side_effect=JSONDecodeError("Error parsing JSON", json_file.read(), 1))
+    parser.load = MagicMock(
+        side_effect=JSONDecodeError("Error parsing JSON", json_file.read(), 1)
+    )
 
     content = sources.read_json_file(json_file)
 
@@ -110,21 +119,24 @@ def test_file_config_source_no_files():
     file_source = sources.FileConfigSource("yaml", [])
 
     assert file_source.has_parameter("channels") is True
-    assert file_source.get_parameter("channels") == ("defaults", )
+    assert file_source.get_parameter("channels") == ("defaults",)
 
 
-@pytest.mark.parametrize("file_contents,file_names, file_type", (
+@pytest.mark.parametrize(
+    "file_contents,file_names, file_type",
     (
-        (TEST_YAML_FILE_VALID_ONE, TEST_YAML_FILE_VALID_TWO),
-        ("test_one.yaml", "test_two.yaml"),
-        "yaml"
+        (
+            (TEST_YAML_FILE_VALID_ONE, TEST_YAML_FILE_VALID_TWO),
+            ("test_one.yaml", "test_two.yaml"),
+            "yaml",
+        ),
+        (
+            (TEST_JSON_FILE_VALID_ONE, TEST_JSON_FILE_VALID_TWO),
+            ("test_one.json", "test_two.json"),
+            "json",
+        ),
     ),
-    (
-        (TEST_JSON_FILE_VALID_ONE, TEST_JSON_FILE_VALID_TWO),
-        ("test_one.json", "test_two.json"),
-        "json"
-    ),
-))
+)
 def test_file_config_source_yaml(tmpdir, file_contents, file_names, file_type):
     """
     Test using two separate configuration files. We need to make sure that the
@@ -155,7 +167,10 @@ def test_file_config_source_bad_file_type():
     """
     bad_file_type = "docx"
 
-    with pytest.raises(NotImplementedError, match=f"File type '{bad_file_type}' is not currently supported"):
+    with pytest.raises(
+        NotImplementedError,
+        match=f"File type '{bad_file_type}' is not currently supported",
+    ):
         sources.get_config_file_parser(bad_file_type)
 
 
@@ -176,12 +191,23 @@ def test_cli_config_source():
     assert cli_source.get_parameter("field_two") == ["value", "two"]
 
 
-@pytest.mark.parametrize("field,value,expected", (
-    ("channels", "bioconda,nvidia", ["bioconda", "nvidia"]),
-    ("envs_dirs", "/opt/folder_one:/opt/folder_two", ["/opt/folder_one", "/opt/folder_two"]),
-    ("disallowed_packages", "package_one&package_two", ["package_one", "package_two"]),
-    ("repodata_threads", "4", "4"),
-))
+@pytest.mark.parametrize(
+    "field,value,expected",
+    (
+        ("channels", "bioconda,nvidia", ["bioconda", "nvidia"]),
+        (
+            "envs_dirs",
+            "/opt/folder_one:/opt/folder_two",
+            ["/opt/folder_one", "/opt/folder_two"],
+        ),
+        (
+            "disallowed_packages",
+            "package_one&package_two",
+            ["package_one", "package_two"],
+        ),
+        ("repodata_threads", "4", "4"),
+    ),
+)
 def test_env_config_source_with_channels(monkeypatch, field, value, expected):
     """
     Simple tests for the CLIConfigSource class
@@ -192,4 +218,3 @@ def test_env_config_source_with_channels(monkeypatch, field, value, expected):
 
     assert env_source.has_parameter(field) is True
     assert env_source.get_parameter(field) == expected
-
