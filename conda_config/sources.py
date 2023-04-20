@@ -5,9 +5,9 @@ import json
 import logging
 import os
 from argparse import Namespace
-from collections.abc import Sequence, Callable
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Literal, Union
+from typing import Any, Literal, Union, Callable
 
 import ruamel.yaml as yaml
 
@@ -64,7 +64,7 @@ def read_json_file(path: Path) -> dict[str, Any]:
     return parsed_data
 
 
-ConfigFileParserFunc = Callable[[Path], dict[str, Any]]
+ConfigFileParserFunc = Callable[[Path], dict]
 
 
 def get_config_file_parser(file_type: ConfigFileTypes) -> ConfigFileParserFunc:

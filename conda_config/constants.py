@@ -3,6 +3,7 @@ Module that is used for declaring constant values for this library.
 
 A lot of these values are copied over from the main conda project (conda.base.constants).
 """
+from __future__ import annotations
 
 import sys
 import struct
